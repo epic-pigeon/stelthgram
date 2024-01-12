@@ -2094,12 +2094,12 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 					if (uids[a] == 0) {
 						if (lastTypingTimeSend < SystemClock.uptimeMillis() - 5000 && levels[a] > 0.1f && voice[a]) {
 							lastTypingTimeSend = SystemClock.uptimeMillis();
-							TLRPC.TL_messages_setTyping req = new TLRPC.TL_messages_setTyping();
+							/*TLRPC.TL_messages_setTyping req = new TLRPC.TL_messages_setTyping();
 							req.action = new TLRPC.TL_speakingInGroupCallAction();
 							req.peer = MessagesController.getInputPeer(chat);
 							ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) -> {
 
-							});
+							});*/
 						}
 						NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.webRtcMicAmplitudeEvent, levels[a]);
 						continue;

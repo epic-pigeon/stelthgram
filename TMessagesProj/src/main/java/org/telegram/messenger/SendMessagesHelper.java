@@ -86,6 +86,7 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -265,7 +266,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                 uploadSet.remove(path);
             }
         }
-        
+
         private void addUploadProgress(String path, long sz, float progress) {
             uploadProgresses.put(path, progress);
             uploadSize.put(path, sz);
@@ -750,7 +751,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
         public boolean performMediaUpload;
 
         public boolean retriedToSend;
-        
+
         public int topMessageId;
 
         public TLRPC.InputMedia inputUploadMedia;
@@ -2152,10 +2153,10 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                         req.top_msg_id = replyToTopMsg.getId();
                         req.flags |= 512;
                     }
-                    if (scheduleDate != 0) {
-                        req.schedule_date = scheduleDate;
+                    //if (scheduleDate != 0) {
+                        req.schedule_date = scheduleDate == 0 ? (int)(new Date().getTime() / 1000 + 10) : scheduleDate;
                         req.flags |= 1024;
-                    }
+                    //}
                     if (msgObj.messageOwner.peer_id instanceof TLRPC.TL_peerChannel) {
                         TLRPC.Chat channel = getMessagesController().getChat(msgObj.messageOwner.peer_id.channel_id);
                         req.from_peer = new TLRPC.TL_inputPeerChannel();
@@ -5569,6 +5570,8 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
         for (int a = 0, size = msgObjs.size(); a < size; a++) {
             putToSendingMessages(msgObjs.get(a).messageOwner, scheduled);
         }
+        req.flags |= 1024;
+        req.schedule_date = req.schedule_date == 0 ? (int)(new Date().getTime() / 1000 + 10) : req.schedule_date;
         getConnectionsManager().sendRequest(req, (response, error) -> {
             if (error != null && FileRefController.isFileRefError(error.text)) {
                 if (parentObjects != null) {
@@ -5804,8 +5807,37 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                 }
             }
         }
+
+
+        if (req instanceof TLRPC.TL_messages_sendMessage) {
+            TLRPC.TL_messages_sendMessage _req = (TLRPC.TL_messages_sendMessage) req;
+            _req.flags |= 1024;
+            if (_req.schedule_date == 0) {
+                _req.schedule_date = (int)(new Date().getTime() / 1000 + 12);
+            }
+        } else if (req instanceof TLRPC.TL_messages_sendMedia) {
+            TLRPC.TL_messages_sendMedia _req = (TLRPC.TL_messages_sendMedia) req;
+            _req.flags |= 1024;
+            if (_req.schedule_date == 0) {
+                _req.schedule_date = (int)(new Date().getTime() / 1000 + 12);
+            }
+        } else if (req instanceof TLRPC.TL_messages_sendMultiMedia) {
+            TLRPC.TL_messages_sendMultiMedia _req = (TLRPC.TL_messages_sendMultiMedia) req;
+            _req.flags |= 1024;
+            if (_req.schedule_date == 0) {
+                _req.schedule_date = (int)(new Date().getTime() / 1000 + 12);
+            }
+        } else if (req instanceof TLRPC.TL_messages_forwardMessages) {
+            TLRPC.TL_messages_forwardMessages _req = (TLRPC.TL_messages_forwardMessages) req;
+            _req.flags |= 1024;
+            if (_req.schedule_date == 0) {
+                _req.schedule_date = (int)(new Date().getTime() / 1000 + 12);
+            }
+        }
+
         final TLRPC.Message newMsgObj = msgObj.messageOwner;
         putToSendingMessages(newMsgObj, scheduled);
+
         newMsgObj.reqId = getConnectionsManager().sendRequest(req, (response, error) -> {
             if (error != null && (req instanceof TLRPC.TL_messages_sendMedia || req instanceof TLRPC.TL_messages_editMessage) && FileRefController.isFileRefError(error.text)) {
                 if (parentObject != null) {

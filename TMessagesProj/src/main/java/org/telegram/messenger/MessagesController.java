@@ -40,6 +40,8 @@ import androidx.core.app.NotificationManagerCompat;
 import androidx.core.graphics.ColorUtils;
 import androidx.core.util.Consumer;
 
+import com.google.android.exoplayer2.util.Log;
+
 import org.telegram.SQLite.SQLiteCursor;
 import org.telegram.SQLite.SQLiteDatabase;
 import org.telegram.SQLite.SQLiteException;
@@ -8239,15 +8241,14 @@ public class MessagesController extends BaseController implements NotificationCe
         if (getUserConfig().isClientActivated()) {
             if (!ignoreSetOnline && getConnectionsManager().getPauseTime() == 0 && ApplicationLoader.isScreenOn && !ApplicationLoader.mainInterfacePausedStageQueue) {
                 if (ApplicationLoader.mainInterfacePausedStageQueueTime != 0 && Math.abs(ApplicationLoader.mainInterfacePausedStageQueueTime - System.currentTimeMillis()) > 1000) {
-                    if (statusSettingState != 1 && (lastStatusUpdateTime == 0 || Math.abs(System.currentTimeMillis() - lastStatusUpdateTime) >= 55000 || offlineSent)) {
+                    if (statusSettingState != 1 && (lastStatusUpdateTime == 0 || Math.abs(System.currentTimeMillis() - lastStatusUpdateTime) >= 20000 || offlineSent)) {
                         statusSettingState = 1;
-
                         if (statusRequest != 0) {
                             getConnectionsManager().cancelRequest(statusRequest, true);
                         }
 
                         TLRPC.TL_account_updateStatus req = new TLRPC.TL_account_updateStatus();
-                        req.offline = false;
+                        req.offline = true;
                         statusRequest = getConnectionsManager().sendRequest(req, (response, error) -> {
                             if (error == null) {
                                 lastStatusUpdateTime = System.currentTimeMillis();
@@ -9098,7 +9099,7 @@ public class MessagesController extends BaseController implements NotificationCe
             return false;
         }
         if (!DialogObject.isEncryptedDialog(dialogId)) {
-            TLRPC.TL_messages_setTyping req = new TLRPC.TL_messages_setTyping();
+            /*TLRPC.TL_messages_setTyping req = new TLRPC.TL_messages_setTyping();
             if (threadMsgId != 0) {
                 req.top_msg_id = threadMsgId;
                 req.flags |= 1;
@@ -9144,7 +9145,7 @@ public class MessagesController extends BaseController implements NotificationCe
             int reqId = getConnectionsManager().sendRequest(req, (response, error) -> AndroidUtilities.runOnUIThread(() -> cancelTyping(action, dialogId, threadMsgId)), ConnectionsManager.RequestFlagFailOnServerErrors);
             if (classGuid != 0) {
                 getConnectionsManager().bindRequestToGuid(reqId, classGuid);
-            }
+            }*/
         } else {
             if (action != 0) {
                 return false;
@@ -11920,7 +11921,7 @@ public class MessagesController extends BaseController implements NotificationCe
 
             });
         } else if (!DialogObject.isEncryptedDialog(task.dialogId)) {
-            TLRPC.InputPeer inputPeer = getInputPeer(task.dialogId);
+            /*TLRPC.InputPeer inputPeer = getInputPeer(task.dialogId);
             TLObject req;
             if (inputPeer instanceof TLRPC.TL_inputPeerChannel) {
                 TLRPC.TL_channels_readHistory request = new TLRPC.TL_channels_readHistory();
@@ -11940,7 +11941,7 @@ public class MessagesController extends BaseController implements NotificationCe
                         processNewDifferenceParams(-1, res.pts, -1, res.pts_count);
                     }
                 }
-            });
+            });*/
         } else {
             TLRPC.EncryptedChat chat = getEncryptedChat(DialogObject.getEncryptedChatId(task.dialogId));
             if (chat.auth_key != null && chat.auth_key.length > 1 && chat instanceof TLRPC.TL_encryptedChat) {

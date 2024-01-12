@@ -852,14 +852,14 @@ public class EmojiAnimationsOverlay implements NotificationCenter.NotificationCe
         }
         interaction.interaction.data = jsonObject.toString();
 
-        TLRPC.TL_messages_setTyping req = new TLRPC.TL_messages_setTyping();
+        /*TLRPC.TL_messages_setTyping req = new TLRPC.TL_messages_setTyping();
         if (threadMsgId != 0) {
             req.top_msg_id = threadMsgId;
             req.flags |= 1;
         }
         req.action = interaction;
         req.peer = MessagesController.getInstance(currentAccount).getInputPeer(dialogId);
-        ConnectionsManager.getInstance(currentAccount).sendRequest(req, null);
+        ConnectionsManager.getInstance(currentAccount).sendRequest(req, null);*/
         clearSendingInfo();
     }
 
